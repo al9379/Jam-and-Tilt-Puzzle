@@ -168,17 +168,25 @@ public class JamConfig implements Configuration {
     public String toString() {
         String end = "";
 
+        end += "   ";
+        for(int c =0; c<board[0].length; c++){
+            end += c+" ";
+        }
+        end += "\n";
+        end += "  ";
+
+        for (int i = 0; i < board[0].length; i++) {
+            end += "--";
+        }
+
+        end += "\n";
+
         for (int i = 0; i < board.length; i++) {
+            end += i + "| ";
             for (int j = 0; j < board[0].length; j++) {
-                if (j == board[0].length - 1) {
-                    end += board[i][j];
-                } else {
-                    end += board[i][j] + " ";
-                }
+                end += board[i][j] + " ";
             }
-            if (i != board.length - 1) {
-                end += "\n";
-            }
+            end += "\n";
         }
         return end;
     }
