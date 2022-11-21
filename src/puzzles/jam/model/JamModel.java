@@ -17,10 +17,22 @@ public class JamModel {
     /** the current configuration */
     private JamConfig currentConfig;
 
-    public JamModel() {
+    /** selection or movement mode */
+    private boolean selecting = true;
 
+    /** stores initial selection */
+    private int[] selected;
+
+
+    public JamModel() {
     }
 
+
+    /**
+     * Updates the current configuration with input from specified file
+     * @param fileName Name of file
+     * @return If the load was successful
+     */
     public boolean loadBoard(String fileName) {
 
         int rows;
@@ -29,6 +41,7 @@ public class JamModel {
 
         try (BufferedReader in = new BufferedReader(new FileReader(fileName))) {
 
+            // Read first two lines
             String[] fields = in.readLine().split("\\s+");
             rows = Integer.parseInt(fields[0]);
             cols = Integer.parseInt(fields[1]);
@@ -41,6 +54,7 @@ public class JamModel {
             int[] endCols = new int[numCars];
             char[][] board = new char[rows][cols];
 
+            // Fill the board with .
             for (char[] row: board) {
                 Arrays.fill(row, '.');
             }
@@ -78,6 +92,69 @@ public class JamModel {
         }
     }
 
+
+    /**
+     * Finds the next step and updates the board
+     */
+    public void useHint() {
+
+        // Solve the current configuration and update config with the next index in the arraylist
+        Collection<Configuration> path = new ArrayList<>(new Solver().solve(currentConfig));
+        int i = 0;
+        for (Configuration configs: path) {
+            if (i == 1) {
+                if (configs instanceof JamConfig) {
+                    currentConfig = (JamConfig) configs;
+                    alertObservers("Next step");
+                }
+                break;
+            }
+            i++;
+        }
+    }
+
+
+    /**
+     * Attempts to select or move to specified row and column
+     * @param r row
+     * @param c column
+     */
+    public void selectSquare(int r, int c) {
+
+        // If in initial selection mode
+        if (selecting) {
+
+            // If there is something at r, c, change selection mode and alertObservers()
+            if (currentConfig.getBoard()[r][c] == '.') {
+                alertObservers("No car at (" + r + ", " + c + ")");
+            } else {
+                selecting = false;
+                selected = new int[]{r, c};
+                alertObservers("Selected (" + selected[0] + ", " + selected[1] + ")");
+            }
+        } else {
+
+            // Try to move to specified square
+            if (currentConfig.trySelect(selected[0], selected[1], r, c)) {
+                alertObservers("Moved (" + selected[0] + ", " + selected[1] + ") to (" + r + ", " + c + ")");
+                selecting = true;
+            } else {
+                alertObservers("Cannot move (" + selected[0] + ", " + selected[1] + ") to (" + r + ", " + c + ")");
+            }
+        }
+
+    }
+
+    /**
+     * @return True if the game is over
+     */
+    public boolean gameOver() {
+        return currentConfig.isSolution();
+    }
+
+    /**
+     * Print the board
+     */
     public void printBoard() {
         System.out.println(currentConfig);
     }

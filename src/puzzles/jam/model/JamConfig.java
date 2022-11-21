@@ -2,7 +2,6 @@ package puzzles.jam.model;
 
 
 import puzzles.common.solver.Configuration;
-import puzzles.jam.solver.Jam;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,10 +16,11 @@ public class JamConfig implements Configuration {
     private final int[] endRow;
     private final int[] endCol;
     private final int goal;
-    private final char[][] board;
+    private char[][] board;
 
     private final boolean[] isVert;
     private final boolean[] isHorizontal;
+
 
     public JamConfig(char[][] board, char[] car, int[] startRow, int[] startCol, int[] endRow, int[] endCol, int goal) {
         this.car = car;
@@ -46,6 +46,176 @@ public class JamConfig implements Configuration {
         return board;
     }
 
+    /**
+     * Tries to move car to a different position
+     * @param oldR Selected row
+     * @param oldC Selected col
+     * @param r Row to move to
+     * @param c Col to move to
+     * @return True if move was successful
+     */
+    public boolean trySelect(int oldR, int oldC, int r, int c) {
+
+        // Index of this cars information
+        int arrayIndex = getArrayIndex(oldR, oldC);
+
+        try {
+
+            // If its horizontal
+            if (isHorizontal[arrayIndex] && oldR == r) {
+
+                int difference = c - oldC;
+
+                char[][] copy = copyBoard(board);
+                int copyStartCol = startCol[arrayIndex];
+                int copyEndCol = endCol[arrayIndex];
+
+                // If moving to the right
+                if (difference > 0) {
+
+                    // Loop through move distance and return false if there is an obstacle
+                    for (int i = 0; i < difference; i++) {
+                        if (copy[r][copyEndCol + 1] =='.') {
+                            copy[r][copyStartCol] = '.';
+                            copyStartCol++;
+                            copyEndCol++;
+                            copy[r][copyEndCol] = car[arrayIndex];
+                        } else {
+                            return false;
+                        }
+                    }
+
+                  // If moving to the left
+                } else if (difference < 0) {
+
+                    // Loop through move distance and return false if there is an obstacle
+                    for (int i = 0; i < Math.abs(difference); i++) {
+                        if (copy[r][copyStartCol - 1] =='.') {
+                            copy[r][copyEndCol] = '.';
+                            copyStartCol--;
+                            copyEndCol--;
+                            copy[r][copyStartCol] = car[arrayIndex];
+                        } else {
+                            return false;
+                        }
+                    }
+                } else {
+                    return true;
+                }
+
+                // If there were no obstacles, set old values to new values
+                board = copy;
+                startCol[arrayIndex] = copyStartCol;
+                endCol[arrayIndex] = copyEndCol;
+                return true;
+
+
+              // If it is vertical
+            } else if (isVert[arrayIndex] && oldC == c) {
+
+                int difference = r - oldR;
+
+                char[][] copy = copyBoard(board);
+                int copyStartRow = startRow[arrayIndex];
+                int copyEndRow = endRow[arrayIndex];
+
+                // If moving down
+                if (difference > 0) {
+
+                    // Loop through move distance and return false if there is an obstacle
+                    for (int i = 0; i < difference; i++) {
+                        if (copy[copyEndRow + 1][c] =='.') {
+                            copy[copyStartRow][c] = '.';
+                            copyStartRow++;
+                            copyEndRow++;
+                            copy[copyEndRow][c] = car[arrayIndex];
+                        } else {
+                            return false;
+                        }
+                    }
+
+                  // If moving up
+                } else if (difference < 0) {
+
+                    // Loop through move distance and return false if there is an obstacle
+                    for (int i = 0; i < Math.abs(difference); i++) {
+                        if (copy[copyStartRow - 1][c] =='.') {
+                            copy[copyEndRow][c] = '.';
+                            copyStartRow--;
+                            copyEndRow--;
+                            copy[copyStartRow][c] = car[arrayIndex];
+                        } else {
+                            return false;
+                        }
+                    }
+                } else {
+                    return true;
+                }
+
+                // If there were no obstacles, set old values to new values
+                board = copy;
+                startRow[arrayIndex] = copyStartRow;
+                endRow[arrayIndex] = copyEndRow;
+
+                return true;
+
+            }
+
+          // If it goes out of bounds, invalid move
+        } catch (IndexOutOfBoundsException e) {
+            return false;
+        }
+
+        return false;
+    }
+
+//    public void remakeBoard() {
+//        for (char[] row: board) {
+//            Arrays.fill(row, '.');
+//        }
+//
+//        // For each car in file
+//        for (int i = 0; i < car.length; i++) {
+//
+//            // Store information of cars in each index
+////            fields = in.readLine().split("\\s+");
+////            cars[i] = fields[0].charAt(0);
+////            startRows[i] = Integer.parseInt(fields[1]);
+////            startCols[i] = Integer.parseInt(fields[2]);
+////            endRows[i] = Integer.parseInt(fields[3]);
+////            endCols[i] = Integer.parseInt(fields[4]);
+//
+//            // Fill the board with cars
+//            if (startRow[i] == endRow[i]) {
+//                for (int j = 0; j <= endCol[i] - startCol[i]; j++) {
+//                    board[startRow[i]][startCol[i] + j] = car[i];
+//                }
+//            } else if (startCol[i] == endCol[i]) {
+//                for (int j = 0; j <= endRow[i] - startRow[i]; j++) {
+//                    board[startRow[i] + j][startCol[i]] = car[i];
+//                }
+//            }
+//        }
+//    }
+
+    /**
+     * Find the index of information for this car
+     * @param r row
+     * @param c col
+     * @return index
+     */
+    public int getArrayIndex(int r, int c) {
+        char carVal = board[r][c];
+        int index = 0;
+        for (char vals: car) {
+            if (vals == carVal) {
+                break;
+            }
+            index++;
+        }
+        return index;
+    }
+
     @Override
     public boolean isSolution() {
         for (char[] chars : board) {
@@ -56,6 +226,11 @@ public class JamConfig implements Configuration {
         return false;
     }
 
+    /**
+     * Makes a copy of the board
+     * @param other board to copy
+     * @return Copy of board
+     */
     private char[][] copyBoard(char[][] other) {
         char[][] newOne = new char[other.length][other[0].length];
         for (int i = 0; i < other.length; i++) {

@@ -13,36 +13,11 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class JamPTUI implements Observer<JamModel, String> {
-    private JamModel model;
+    private final JamModel model;
     private Scanner in;
     private boolean gameOn;
-    private boolean reset = false;
     private String lastFile;
 
-    @Override
-    public void update(JamModel jamModel, String message) {
-
-        if (message.contains("Loaded: ")) {
-            System.out.println(message);
-            displayBoard();
-            return;
-        } else if (message.contains("Failed to load: ")) {
-            System.out.println(message);
-            displayBoard();
-            return;
-        }
-
-//        if (model.gameOver()) {
-//            displayBoard();
-//            System.out.println("You Win");
-//            gameOn = false;
-//            return;
-//        }
-        displayBoard();
-        System.out.println(message);
-
-
-    }
 
     public JamPTUI (String fileName) {
         lastFile = fileName;
@@ -57,8 +32,9 @@ public class JamPTUI implements Observer<JamModel, String> {
         System.out.println("s(elect) r c     -- select cell at r, c");
         System.out.println("q(uit)           -- quit the game");
         System.out.println("r(eset)          -- reset the current game");
-
     }
+
+
 
     public static void main(String[] args) {
         if (args.length != 1) {
@@ -66,66 +42,115 @@ public class JamPTUI implements Observer<JamModel, String> {
         } else {
             JamPTUI ptui = new JamPTUI(args[0]);
             ptui.run();
+
         }
     }
 
+    /**
+     * Starts the game and loads the file
+     * @param fileName File to load
+     */
     public void gameStart(String fileName){
+        gameOn = true;
         loadFromFile(fileName);
     }
+
+    /**
+     * Runs the main game loop
+     */
     public void run() {
         while (true) {
-            if (!gameLoop()) //loads new games or quits
+            if (!gameLoop()) {  // Quits if gameLoop() is done
+                in.close();
                 break;
-            //gameLoop(); // gameplay
+            }
         }
     }
 
+    /**
+     * Main game loop
+     * @return True if game is still running
+     */
     private boolean gameLoop(){
         boolean ready = false;
         while(!ready){
 
-            String command =  in.next(); // Using next allows you to string together load commands
+            String command =  in.next();  // Using next allows you to string together load commands
 
-            switch (command){
+            switch (command) {
+
+                // Get a hint
                 case "H":
                 case "h":
-                    ready=true;
+                    if (gameOn) {
+                        model.useHint();
+                        ready = true;
+                        break;
+                    }
+                    System.out.println("Already solved");
+                    gameOn = false;
                     break;
 
                 // Load a file
                 case "L":
                 case "l":
                     command = in.next();
-                    ready = loadFromFile(command);
+                    if (loadFromFile(command)) {
+                        gameOn = true;
+                    }
                     break;
+
+                // Select square
                 case "S":
                 case "s":
+                    if (gameOn) {
+                        int row = Integer.parseInt(in.next());
+                        int col = Integer.parseInt(in.next());
+                        model.selectSquare(row, col);
+                        break;
+                    }
+                    System.out.println("Already solved");
+                    gameOn = false;
+                    in = new Scanner(System.in);//get rid of any remaining commands from the start menu
                     break;
 
                 // Quit program
                 case "Q":
                 case "q":
                     System.out.println("Exiting...");
-                    ready = true;
                     in = new Scanner(System.in);  //get rid of any remaining commands from the start menu
+                    gameOn = false;
                     return false;
 
                 // Reset file
                 case "R":
                 case "r":
-                    reset = true;
+                case "reset":
                     System.out.println("Resetting...");
                     gameStart(lastFile);
+                    gameOn = true;
                     break;
+
+                // Command list if invalid input
                 default:
-                    System.out.println("Enter H, L, S, Q or R.");
+                    System.out.println("h(int)           -- hint next move");
+                    System.out.println("l(oad) filename  -- load new puzzle file");
+                    System.out.println("s(elect) r c     -- select cell at r, c");
+                    System.out.println("q(uit)           -- quit the game");
+                    System.out.println("r(eset)          -- reset the current game");
+                    in = new Scanner(System.in);//get rid of any remaining commands from the start menu
             }
-            gameOn = true;
         }
+
         in = new Scanner(System.in);//get rid of any remaining commands from the start menu
         return true;
     }
 
+    /**
+     * Loads a board
+     * @param command file name
+     * @return True if the file can be loaded
+     */
     public boolean loadFromFile(String command){
 
         // If the file can be loaded, make it the previous file
@@ -139,5 +164,33 @@ public class JamPTUI implements Observer<JamModel, String> {
 
     public void displayBoard(){
         model.printBoard();
+    }
+
+    @Override
+    public void update(JamModel jamModel, String message) {
+
+        if (message.contains("Loaded: ")) {
+            System.out.println(message);
+            displayBoard();
+            return;
+        } else if (message.contains("Failed to load: ")) {
+            System.out.println(message);
+            if (gameOn) {
+                displayBoard();
+            }
+            return;
+        }
+
+        if (model.gameOver()) {
+            System.out.println(message);
+            displayBoard();
+            System.out.println("You Win");
+            System.out.println("Start a new game or quit");
+            gameOn = false;
+            return;
+        }
+        System.out.println(message);
+        displayBoard();
+
     }
 }
