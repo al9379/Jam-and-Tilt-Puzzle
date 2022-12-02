@@ -72,8 +72,7 @@ public class JamPTUI implements Observer<JamModel, String> {
             switch (command) {
 
                 // Get a hint
-                case "H":
-                case "h":
+                case "H", "h" -> {
                     if (gameOn) {
                         model.useHint();
                         ready = true;
@@ -81,20 +80,18 @@ public class JamPTUI implements Observer<JamModel, String> {
                     }
                     System.out.println("Already solved");
                     gameOn = false;
-                    break;
+                }
 
                 // Load a file
-                case "L":
-                case "l":
+                case "L", "l" -> {
                     command = in.next();
                     if (loadFromFile(command)) {
                         gameOn = true;
                     }
-                    break;
+                }
 
                 // Select square
-                case "S":
-                case "s":
+                case "S", "s" -> {
                     if (gameOn) {
                         int row = Integer.parseInt(in.next());
                         int col = Integer.parseInt(in.next());
@@ -104,37 +101,33 @@ public class JamPTUI implements Observer<JamModel, String> {
                     System.out.println("Already solved");
                     gameOn = false;
                     in = new Scanner(System.in);//get rid of any remaining commands from the start menu
-                    break;
+                }
 
                 // Quit program
-                case "Q":
-                case "q":
+                case "Q", "q", "quit" -> {
                     System.out.println("Exiting...");
-                    in = new Scanner(System.in);  //get rid of any remaining commands from the start menu
                     gameOn = false;
                     return false;
+                }
 
                 // Reset file
-                case "R":
-                case "r":
-                case "reset":
+                case "R", "r", "reset" -> {
                     System.out.println("Resetting...");
                     gameStart(lastFile);
                     gameOn = true;
-                    break;
+                }
 
                 // Command list if invalid input
-                default:
+                default -> {
                     System.out.println("h(int)           -- hint next move");
                     System.out.println("l(oad) filename  -- load new puzzle file");
                     System.out.println("s(elect) r c     -- select cell at r, c");
                     System.out.println("q(uit)           -- quit the game");
                     System.out.println("r(eset)          -- reset the current game");
-                    in = new Scanner(System.in);//get rid of any remaining commands from the start menu
+                }
             }
         }
 
-        in = new Scanner(System.in);//get rid of any remaining commands from the start menu
         return true;
     }
 

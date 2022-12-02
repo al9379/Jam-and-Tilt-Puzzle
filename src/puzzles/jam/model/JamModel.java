@@ -104,13 +104,9 @@ public class JamModel {
                 alertObservers("Loaded: " + fileName);
             }
             return true;
-        } catch (IOException e) {
+        } catch (Exception e) {
 
-            if (fileName.toString().length() > 50) {
-                alertObservers("Failed to load: " + fileName.toString().substring(61));
-            } else {
-                alertObservers("Failed to load: " + fileName);
-            }
+            alertObservers("Failed to load: Try again");
             return false;
         }
     }

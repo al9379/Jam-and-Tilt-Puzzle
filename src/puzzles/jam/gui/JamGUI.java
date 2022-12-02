@@ -102,7 +102,7 @@ public class JamGUI extends Application  implements Observer<JamModel, String>  
         stage.setWidth(ICON_SIZE * model.getCols() + 22);
         stage.setResizable(false);
         stage.show();
-        update(model, "Loaded: " + filename);
+        updateScreen();
     }
 
     public void newBoard(Stage stage) {
@@ -119,7 +119,11 @@ public class JamGUI extends Application  implements Observer<JamModel, String>  
         gridPane.setBackground(Background.fill(Color.GRAY));
         gridPane.setGridLinesVisible(true);
 
-        loadFile(stage);
+
+        // Keep prompting user for correct file input
+        while (!loadFile(stage)) {
+            label.setText("Load Failed: Try again");
+        }
 
         // Make a grid of buttons
         for (int i = 0; i < model.getRows(); i++) {
@@ -156,7 +160,8 @@ public class JamGUI extends Application  implements Observer<JamModel, String>  
         stage.setWidth(ICON_SIZE * model.getCols() + 22);
         stage.setResizable(false);
         stage.show();
-        update(model, "Loaded: " + previousFile.substring(61));
+
+        updateScreen();
     }
 
     /**
@@ -197,11 +202,11 @@ public class JamGUI extends Application  implements Observer<JamModel, String>  
      * Loads file from a file chooser
      * @param stage current stage
      */
-    public void loadFile(Stage stage) {
+    public boolean loadFile(Stage stage){
 
-        // Uses fileChooser to select a file and send it to the model
-        String name = "";
         try {
+            // Uses fileChooser to select a file and send it to the model
+
             gameOn = true;
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Load a game board.");
@@ -209,13 +214,15 @@ public class JamGUI extends Application  implements Observer<JamModel, String>  
             fileChooser.getExtensionFilters().addAll(
                     new FileChooser.ExtensionFilter("Text Files", "*.txt"));
             File selected = fileChooser.showOpenDialog(stage);
-            name = selected.toString();
 
             if (model.loadBoard(selected)) {
                 previousFile = selected.toString();
+                return true;
             }
+            return false;
         } catch (Exception e) {
-            update(model, "Failed to load: " + name.substring(61));
+            label.setText("Failed to load: Try again");
+            return false;
         }
 
     }
@@ -228,6 +235,19 @@ public class JamGUI extends Application  implements Observer<JamModel, String>  
     public void select(int x, int y) {
         if (gameOn) {
             model.selectSquare(x, y);
+        }
+    }
+
+    public void updateScreen() {
+
+        // Update every button in the board with new colors
+        for (Node b : gridPane.getChildren()) {
+
+            if (b instanceof Button) {
+                Color color = findColor(model.getBoard()[GridPane.getRowIndex(b)][GridPane.getColumnIndex(b)]);
+                ((Button) b).setBackground(Background.fill(color));
+                ((Button) b).setText(String.valueOf(model.getBoard()[GridPane.getRowIndex(b)][GridPane.getColumnIndex(b)]));
+            }
         }
     }
 
