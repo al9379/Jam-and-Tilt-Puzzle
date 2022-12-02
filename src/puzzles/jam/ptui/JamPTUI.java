@@ -1,15 +1,7 @@
 package puzzles.jam.ptui;
 
 import puzzles.common.Observer;
-import puzzles.jam.model.JamConfig;
 import puzzles.jam.model.JamModel;
-
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.InputMismatchException;
-import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class JamPTUI implements Observer<JamModel, String> {
@@ -172,6 +164,12 @@ public class JamPTUI implements Observer<JamModel, String> {
         if (message.contains("Loaded: ")) {
             System.out.println(message);
             displayBoard();
+            if (model.gameOver()) {
+                System.out.println("You Win");
+                System.out.println("Start a new game or quit");
+                gameOn = false;
+                return;
+            }
             return;
         } else if (message.contains("Failed to load: ")) {
             System.out.println(message);

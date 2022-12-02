@@ -4,10 +4,7 @@ import puzzles.common.Observer;
 import puzzles.common.solver.Configuration;
 import puzzles.common.solver.Solver;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 public class JamModel {
@@ -23,20 +20,36 @@ public class JamModel {
     /** stores initial selection */
     private int[] selected;
 
+    private int rows;
+    private int cols;
+
 
     public JamModel() {
     }
 
+    public char[][] getBoard() {
+        return currentConfig.getBoard();
+    }
+
+    public int getRows() {
+        return rows;
+    }
+
+    public int getCols() {
+        return cols;
+    }
+
+    public boolean loadBoard(String filename) {
+        return loadBoard(new File(filename));
+    }
 
     /**
      * Updates the current configuration with input from specified file
      * @param fileName Name of file
      * @return If the load was successful
      */
-    public boolean loadBoard(String fileName) {
+    public boolean loadBoard(File fileName) {
 
-        int rows;
-        int cols;
         int numCars;
 
         try (BufferedReader in = new BufferedReader(new FileReader(fileName))) {
@@ -84,10 +97,20 @@ public class JamModel {
 
             currentConfig = new JamConfig(board, cars, startRows, startCols, endRows, endCols, cols - 1);
 
-            alertObservers("Loaded: " + fileName);
+            // Update board with successful/unsuccessful load message
+            if (fileName.toString().length() > 50) {
+                alertObservers("Loaded: " + fileName.toString().substring(61));
+            } else {
+                alertObservers("Loaded: " + fileName);
+            }
             return true;
         } catch (IOException e) {
-            alertObservers("Failed to load: " + fileName);
+
+            if (fileName.toString().length() > 50) {
+                alertObservers("Failed to load: " + fileName.toString().substring(61));
+            } else {
+                alertObservers("Failed to load: " + fileName);
+            }
             return false;
         }
     }
