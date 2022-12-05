@@ -114,7 +114,6 @@ public class JamPTUI implements Observer<JamModel, String> {
                 case "R", "r", "reset" -> {
                     System.out.println("Resetting...");
                     gameStart(lastFile);
-                    gameOn = true;
                 }
 
                 // Command list if invalid input
@@ -127,7 +126,6 @@ public class JamPTUI implements Observer<JamModel, String> {
                 }
             }
         }
-
         return true;
     }
 

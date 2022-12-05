@@ -26,7 +26,6 @@ public class JamGUI extends Application  implements Observer<JamModel, String>  
 
     private boolean gameOn = true;  // Stores state of the game
     private JamModel model;    // Instance of the model
-
     private String filename = "";
 
     public void init() {

@@ -3,6 +3,7 @@
     <option name="INCLUDE_PROVIDED_SCOPE" value="true" />
     <option name="MAIN_CLASS_NAME" value="puzzles.tilt.gui.TiltGUI" />
     <module name="BFSPuzzleSolver2" />
+    <option name="PROGRAM_PARAMETERS" value="tilt-4.txt" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="puzzles.tilt.gui.*" />
