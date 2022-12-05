@@ -21,18 +21,37 @@ public class TiltModel {
 
     public static String HINT_PREFIX = "Hint:";
 
+    /**
+     * Default constructor for TiltModel
+     * @param filename
+     * @throws IOException
+     */
     public TiltModel(String filename) throws IOException {
         loadBoard(filename);
     }
 
+    /**
+     * Gets the 2-d array of the current configuration
+     * @return the 2-d array
+     */
     public char[][] getBoard(){
         return currentConfig.getBoard();
     }
 
+    /**
+     * @param filename
+     * @return boolean to show if it can load the board
+     * @throws IOException
+     */
     public boolean loadBoard(String filename) throws IOException {
         return loadBoard(new File(filename));
     }
 
+    /**
+     * Loads the board from the file given
+     * @param fileName
+     * @return boolean to show if it was able to be loaded
+     */
     public boolean loadBoard(File fileName){
         boolean valid = true;
         try (BufferedReader in = new BufferedReader(new FileReader(fileName))) {
@@ -50,7 +69,7 @@ public class TiltModel {
             currentConfig = new TiltConfig(board,dim);
             alertObservers(LOADED + fileName);
         }
-        catch(Exception e){
+        catch(Exception e){ //catches failure to load
             alertObservers(LOAD_FAILED);
             valid = false;
         }
@@ -69,6 +88,9 @@ public class TiltModel {
         return dim;
     }
 
+    /**
+     * Finds the next best option by calling on our solver
+     */
     public void useHint() {
         Collection<Configuration> path = new ArrayList<>(new Solver().solve(currentConfig));
         int i = 0;
@@ -84,55 +106,51 @@ public class TiltModel {
         }
     }
 
+    /**
+     * Moves the board into whichever direction it needs to go
+     * @param direction
+     */
     public void move(char direction){
         TiltConfig lastConfig = currentConfig;
 
         if(direction == 'n' || direction == 'N'){
             currentConfig = currentConfig.moveNorth();
             if(currentConfig.getBoard()[0][0] != 'e') {
-                //printBoard();
                 alertObservers("Tilted North");
             }
             else {
                 System.out.println("Blue will fall in");
                 currentConfig = lastConfig;
-                //printBoard();
             }
         }
         if(direction == 's' || direction == 'S'){
             currentConfig = currentConfig.moveSouth();
             if(currentConfig.getBoard()[0][0] != 'e') {
-                //printBoard();
                 alertObservers("Tiled South");
             }
             else {
                 System.out.println("Blue falls in");
                 currentConfig = lastConfig;
-                //printBoard();
             }
         }
         if(direction == 'w' || direction == 'W'){
             currentConfig = currentConfig.moveWest();
             if(currentConfig.getBoard()[0][0] != 'e') {
-                //printBoard();
                 alertObservers("Tilted West");
             }
             else {
                 System.out.println("Blue falls in");
                 currentConfig = lastConfig;
-                //printBoard();
             }
         }
         if(direction == 'e' || direction == 'E'){
             currentConfig = currentConfig.moveEast();
             if(currentConfig.getBoard()[0][0] != 'e') {
-                //printBoard();
                 alertObservers("Tilted East");
             }
             else {
-                System.out.println("Blue will fall in");
+                System.out.println("Blue falls in");
                 currentConfig = lastConfig;
-                //printBoard();
             }
         }
     }

@@ -14,7 +14,7 @@ public class Tilt {
             System.out.println("Usage: java Tilt filename");
         }
         else{
-
+            //reads the given file
             String file = args[0];
             String line;
             int row = 0;
@@ -31,6 +31,7 @@ public class Tilt {
             }
             in.close();
 
+            //uses TiltConfig model to solve
             Configuration data = new TiltConfig(board,dim);
             Solver x = new Solver();
 

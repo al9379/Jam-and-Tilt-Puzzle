@@ -13,6 +13,11 @@ public class TiltPTUI implements Observer<TiltModel, String> {
     private String lastFile;
 
 
+    /**
+     * Default constructor for TiltPTUI
+     * @param fileName: name of the file
+     * @throws IOException
+     */
     public TiltPTUI(String fileName) throws IOException {
         lastFile = fileName;
         model = new TiltModel(fileName);
@@ -38,6 +43,12 @@ public class TiltPTUI implements Observer<TiltModel, String> {
         }
     }
 
+    /**
+     * Loads file given
+     * @param command
+     * @return if it was able to be read
+     * @throws IOException
+     */
     public boolean loadFromFile(String command) throws IOException {
         boolean result = model.loadBoard(command);
         if(result){
@@ -56,11 +67,21 @@ public class TiltPTUI implements Observer<TiltModel, String> {
         }
     }
 
+    /**
+     * Starts the game by reading file
+     * @param fileName name of the file
+     * @throws IOException
+     */
     public void gameStart(String fileName) throws IOException {
         gameOn = true;
         loadFromFile(fileName);
     }
 
+    /**
+     * Continuously loops throughout the game as long as it is playing
+     * @return boolean to show if its ready
+     * @throws IOException
+     */
     public boolean gameLoop() throws IOException {
         boolean ready = false;
 
@@ -119,10 +140,18 @@ public class TiltPTUI implements Observer<TiltModel, String> {
         return true;
     }
 
+    //displays the board
     public void displayBoard(){
         model.printBoard();
     }
 
+    /**
+     * Whenever an action occurs, this is called on
+     * @param model the object that wishes to inform this object
+     *                about something that has happened.
+     * @param message optional data the server.model can send to the observer
+     *
+     */
     @Override
     public void update(TiltModel model, String message) {
         if (message.contains("Loaded: ")) {

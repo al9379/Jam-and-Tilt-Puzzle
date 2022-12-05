@@ -13,9 +13,15 @@ public class TiltConfig implements Configuration {
     private final char[][] current;
     private static int dim;
 
+    /**
+     * Default constructor for TiltConfig
+     * @param initial the initial 2d array given
+     * @param size the dimensions of the board
+     */
     public TiltConfig(char[][] initial, int size){
         dim = size;
         current = new char[size][size];
+        //copies the array onto another one
         for(int i = 0; i < size; i++){
             System.arraycopy(initial[i], 0, current[i], 0, size);
         }
@@ -28,6 +34,10 @@ public class TiltConfig implements Configuration {
         }
     }
 
+    /**
+     * Checks to see if there is any G blocks left
+     * @return if the puzzle is solved
+     */
     @Override
     public boolean isSolution(){
         for(int i = 0; i < dim; i++){
@@ -39,6 +49,9 @@ public class TiltConfig implements Configuration {
         return true;
     }
 
+    /**
+     * @return the possible neighbors of the current board
+     */
     @Override
     public Collection<Configuration> getNeighbors() {
         HashSet<Configuration> set = new LinkedHashSet<>();
@@ -58,6 +71,7 @@ public class TiltConfig implements Configuration {
             }
         }
 
+        //starts from the top left and goes to the bottom right
         for(int i = 0; i < dim; i++){
             for(int j = 0; j < dim; j++){
                 if(current[i][j] == 'B' || current[i][j] == 'G'){
@@ -105,6 +119,7 @@ public class TiltConfig implements Configuration {
             }
         }
 
+        //starts from the bottom right and moves tot he top left
         for(int i = dim-1; i >= 0; i--){
             for(int j = dim-1; j >= 0; j--){
                 if(current[i][j] == 'B' || current[i][j] == 'G'){
@@ -155,6 +170,7 @@ public class TiltConfig implements Configuration {
             }
         }
 
+        //adds to the set if it was valid
         if(uValid)
             set.add(new TiltConfig(up));
         if(rValid)
@@ -167,6 +183,10 @@ public class TiltConfig implements Configuration {
         return set;
     }
 
+    /**
+     *
+     * @return tiltconfig of the board moving north
+     */
     public TiltConfig moveNorth(){
         char[][] up = new char[dim][dim];
         char[][] empty = new char[dim][dim];
@@ -211,6 +231,10 @@ public class TiltConfig implements Configuration {
             return new TiltConfig(empty);
     }
 
+    /**
+     *
+     * @return tiltconfig of the baord moving west
+     */
     public TiltConfig moveWest(){
         boolean isValid = true;
         char[][] left = new char[dim][dim];
@@ -254,6 +278,10 @@ public class TiltConfig implements Configuration {
         else
             return new TiltConfig(empty);    }
 
+    /**
+     *
+     * @return tiltconfig of the board moving south
+     */
     public TiltConfig moveSouth(){
         boolean isValid = true;
         char[][] down = new char[dim][dim];
@@ -298,6 +326,10 @@ public class TiltConfig implements Configuration {
             return new TiltConfig(empty);
     }
 
+    /**
+     *
+     * @return tiltconfig of the board moving east
+     */
     public TiltConfig moveEast(){
         boolean isValid = true;
         char[][] right = new char[dim][dim];

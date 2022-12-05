@@ -25,12 +25,11 @@ public class TiltGUI extends Application implements Observer<TiltModel, String> 
     private final static String RESOURCES_DIR = "resources/";
     private TiltModel model;
     private Label label;
-    GridPane gridPane = new GridPane();       // Grid in center
-    FlowPane flowPane;       // Buttons at bottom
+    GridPane gridPane = new GridPane();
     private String filename = "";
     private boolean gameOn = true;
     private String previousFile;
-    private Button[][] buttonGrid;
+    private boolean newGame = false;
 
 
     // for demonstration purposes
@@ -45,12 +44,24 @@ public class TiltGUI extends Application implements Observer<TiltModel, String> 
     private final Image white =
             new Image(Objects.requireNonNull(getClass().getResourceAsStream(RESOURCES_DIR + "white.png")));
 
+    /**
+     * Initializes the model
+     * @throws IOException
+     */
     public void init() throws IOException {
         filename = getParameters().getRaw().get(0);
         this.model = new TiltModel(filename);
         model.addObserver(this);
     }
 
+    /**
+     * Sets up the board
+     * @param stage the primary stage for this application, onto which
+     * the application scene can be set.
+     * Applications may create other stages, if needed, but they will not be
+     * primary stages.
+     * @throws Exception
+     */
     @Override
     public void start(Stage stage) throws Exception {
         label = new Label("Tilt GUI");
@@ -111,6 +122,7 @@ public class TiltGUI extends Application implements Observer<TiltModel, String> 
         hBox.setAlignment(Pos.CENTER);
         borderPane.setBottom(hBox);
 
+        //If the player chooses load
         first.setOnAction((event) -> {
             boolean read = false;
             while(!read) {
@@ -119,6 +131,7 @@ public class TiltGUI extends Application implements Observer<TiltModel, String> 
                     fileChooser.setTitle("Open Resource File");
                     fileChooser.setInitialDirectory(new File(System.getProperty("user.dir") + "/data/tilt"));
                     File name = fileChooser.showOpenDialog(stage);
+                    newGame = true;
                     loadFile(String.valueOf(name));
                     read = true;
                 } catch (Exception e) {
@@ -126,9 +139,11 @@ public class TiltGUI extends Application implements Observer<TiltModel, String> 
                 }
             }
         });
+        //if the player resets the file
         second.setOnAction((event) -> {
             resetFile();
         });
+        //if the player chooses hint
         third.setOnAction((event) -> {
             hint();
         });
@@ -150,22 +165,28 @@ public class TiltGUI extends Application implements Observer<TiltModel, String> 
         loadFile(previousFile);
     }
 
+    //loads the file from the given string
     public void loadFile(String filename) {
         try {
             gameOn = true;
             if (model.loadBoard(filename)) {
                 previousFile = filename;
+                if(newGame){
+                    makeGridPane();
+                }
             }
         } catch (Exception e) {
             update(model, "Failed to load: " + filename);
         }
     }
 
+    //makes the board as a gridpane of buttons
     private GridPane makeGridPane(){
         //Uses a GridPane due to the structured layout of the board
         for (int row=0; row<model.getDim(); ++row) {
             for (int col=0; col<model.getDim(); ++col) {
                 Button button = new Button();
+                button.setMaxSize(10,10);
                 if(model.getBoard()[row][col] == 'G'){
                     button.setGraphic(new ImageView(greenDisk));
                 }
@@ -193,6 +214,7 @@ public class TiltGUI extends Application implements Observer<TiltModel, String> 
 
         label.setText(message);
 
+        //Changes all the buttons to the current model
         if (gameOn) {
             for (Node b : gridPane.getChildren()) {
                 if (b instanceof Button) {
@@ -214,6 +236,10 @@ public class TiltGUI extends Application implements Observer<TiltModel, String> 
                     b.setStyle("-fx-border-color: grey;");
                 }
             }
+        }
+
+        if(message.equals("Blue falls in")){
+            label.setText("Not allowed");
         }
 
         if (model.gameOver()) {
